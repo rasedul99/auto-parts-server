@@ -22,6 +22,9 @@ const run = async () => {
     await client.connect();
     const userCollection = client.db("auto_parts").collection("users");
     const carPartsCollection = client.db("auto_parts").collection("carparts");
+    const orderdCarPartsCollection = client
+      .db("auto_parts")
+      .collection("orderd");
     const reviewsCollection = client.db("auto_parts").collection("reviews");
 
     // services api
@@ -42,6 +45,21 @@ const run = async () => {
       const query = { _id: ObjectId(id) };
       const result = await carPartsCollection.findOne(query);
       res.send({ success: true, result: result });
+    });
+
+    app.post("/orderd", async (req, res) => {
+      const orderd = req.body;
+      const result = await orderdCarPartsCollection.insertOne(orderd);
+      res.send({
+        success: true,
+        message: ` succesfully ${orderd.partsname}`,
+      });
+    });
+    app.get("/orders/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const orders = await orderdCarPartsCollection.find(query).toArray();
+      res.send(orders);
     });
     app.post("/reviews", async (req, res) => {
       const reviews = req.body;
