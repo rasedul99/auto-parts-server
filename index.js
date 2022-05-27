@@ -36,6 +36,13 @@ const run = async () => {
         message: `inserted succesfully ${parts.partsname}`,
       });
     });
+
+    app.get("/carparts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await carPartsCollection.findOne(query);
+      res.send({ success: true, result: result });
+    });
     app.post("/reviews", async (req, res) => {
       const reviews = req.body;
       const result = await reviewsCollection.insertOne(reviews);
