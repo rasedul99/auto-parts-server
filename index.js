@@ -128,6 +128,7 @@ const run = async () => {
         res.send({ admin: isAdmin });
       }
     });
+    // make admin
     app.put("/user/admin/:email", async (req, res) => {
       const email = req.params.email;
       const requesterAccount = await userCollection.findOne({ email: email });
