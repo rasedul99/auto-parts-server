@@ -69,7 +69,7 @@ const run = async () => {
       const result = await reviewsCollection.insertOne(reviews);
       res.send({
         success: true,
-        message: " Thank you ",
+        message: " Thank you for rate us ",
       });
     });
 // get All reviews
