@@ -22,6 +22,7 @@ const run = async () => {
     await client.connect();
     const userCollection = client.db("auto_parts").collection("users");
     const carPartsCollection = client.db("auto_parts").collection("carparts");
+    const userProfileCollection = client.db("auto_parts").collection("profils");
     const orderdCarPartsCollection = client
       .db("auto_parts")
       .collection("orderd");
@@ -83,6 +84,27 @@ const run = async () => {
       const users = await userCollection.find().toArray();
       res.send(users);
     });
+    app.get("/user/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const query = { email: email };
+      const profile = await userProfileCollection.find(query).toArray();
+      res.send(profile);
+    });
+    app.put("/user/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const profile = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: profile,
+      };
+      const result = await userProfileCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send(result);
+    });
 
     app.put("/user/:email", async (req, res) => {
       const email = req.params.email;
@@ -99,13 +121,16 @@ const run = async () => {
     app.get("/admin/:email", async (req, res) => {
       const email = req.params.email;
       const user = await userCollection.findOne({ email: email });
-      const isAdmin = user.role === "admin";
-      res.send({ admin: isAdmin });
+      if (user) {
+        const isAdmin = user.role === "admin";
+        res.send({ admin: isAdmin });
+      }
     });
     app.put("/user/admin/:email", async (req, res) => {
       const email = req.params.email;
       const requesterAccount = await userCollection.findOne({ email: email });
-      if (requesterAccount.role === "admin") {
+      console.log(requesterAccount);
+      if (requesterAccount.role !== "admin") {
         const filter = { email: email };
         const updateDoc = {
           $set: { role: "admin" },
@@ -115,6 +140,16 @@ const run = async () => {
       } else {
         res.send({ message: "forbidden" });
       }
+    });
+
+    app.delete("/orders/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log(id);
+      const query = { _id: ObjectId(id) };
+      console.log(query);
+      const result = await orderdCarPartsCollection.deleteOne(query);
+      console.log(result);
+      res.send(result);
     });
   } catch (error) {
     console.log(error);
